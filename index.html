@@ -497,7 +497,10 @@ $("#enviar").addEventListener("click", ev=>{
     pago: document.querySelector('input[name="pago"]:checked').value,
     notas: $("#notas").value.trim(), msg: mensaje()
   });
-  ev.currentTarget.href = `${SCRIPT_URL}?${q}`;
+  // El pedido se registra en la hoja en segundo plano y WhatsApp se abre directo,
+  // así no depende de la cuenta de Google que tenga abierta el cliente.
+  try{ fetch(`${SCRIPT_URL}?${q}`, {mode:"no-cors", keepalive:true, credentials:"omit"}) }catch(e){}
+  ev.currentTarget.href = wa;
   $("#reintentar").href = wa;
   setTimeout(()=>{ $("#form").hidden=true; $("#lineas").hidden=true; document.querySelectorAll(".resumen,.total").forEach(e=>e.hidden=true); $("#enviado").hidden=false; }, 400);
 });
