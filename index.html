@@ -175,7 +175,6 @@ footer strong{color:var(--mole)}
   <div class="wrap hero-grid">
     <div>
       <h1 class="marca">Kutzi</h1>
-      <span class="promo">10% de descuento de lanzamiento en todo tu pedido</span>
       <p class="marca-sub">Productos regionales de Michoacán, directo a tu oficina o en nuestra tienda.</p>
       <p>Quesos de Tierra Caliente, chorizo de Huetamo, mole de Acuitzio, huevo de libre pastoreo y tortillas hechas en comal. Todo fresco, de alta rotación y directo de quienes lo producen.</p>
       <p class="mision">Creemos en la <strong>soberanía alimentaria</strong>: cada compra apoya a productores michoacanos y mantiene vivos los sabores de nuestra tierra.</p>
@@ -257,7 +256,7 @@ footer strong{color:var(--mole)}
   <div class="panel-cuerpo">
     <div id="lineas"></div>
     <div class="resumen"><span>Subtotal</span><span id="subtotal">$0</span></div>
-    <div class="resumen desc"><span>Descuento de lanzamiento (10%)</span><span id="descuento">-$0</span></div>
+    <div class="resumen desc" hidden><span>Descuento de lanzamiento (10%)</span><span id="descuento">-$0</span></div>
     <div class="total"><span>Total</span><span id="total">$0</span></div>
     <form id="form" novalidate>
       <label>¿Dónde lo recibes?<select id="lugar"></select></label>
@@ -372,7 +371,7 @@ function render(){
   $("#lista-maiz").innerHTML = grupos.maiz;
 }
 
-const DESC = 0.10, GMIN = 100;
+const DESC = 0, GMIN = 100;
 const precioG = (pr,g) => Math.round(pr.kg*g/1000);
 function info(clave){
   const [id,i] = clave.split("|");
@@ -411,7 +410,7 @@ function mensaje(){
   const notas = $("#notas").value.trim();
   return ["Hola Kutzi, quiero hacer un pedido:","",
     ...ls.map(l=>`• ${l.q} × ${l.pr.nombre} (${l.v.p}) = ${dinero(l.sub)}`),"",
-    `Subtotal: ${dinero(subtotal())}`, `Descuento de lanzamiento 10%: -${dinero(descuento())}`, `Total: ${dinero(total())}`,"",
+    ...(DESC?[`Subtotal: ${dinero(subtotal())}`, `Descuento ${DESC*100}%: -${dinero(descuento())}`]:[]), `Total: ${dinero(total())}`,"",
     `Nombre: ${$("#nombre").value.trim()}`,
     `Entrega: ${entrega()}`,
     ...(lugarSel().tipo!=="Tienda"?[`Área o piso: ${$("#area").value.trim()}`]:[]),
