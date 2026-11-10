@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kutzi · Tarjeta de lealtad</title>
+<meta name="theme-color" content="#3A2318">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;800&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<style>
+:root{
+  --papel:#F2E8D5; --papel-2:#E9DCC2; --mole:#3A2318; --mole-suave:#6B5140;
+  --chile:#9E2F1E; --maiz:#E0A93A; --nopal:#4C6A36; --linea:#D6C5A6; --blanco:#FFFBF3;
+  --azul:#2E5A7A;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--papel);color:var(--mole);font:400 18px/1.5 "Alegreya Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--maiz);outline-offset:2px}
+.wrap{max-width:520px;margin:0 auto;padding:20px 18px 48px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.marca{font:800 30px/1 "Alegreya",serif;letter-spacing:.5px}
+.marca small{display:block;font:500 13px/1.3 "Alegreya Sans",sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--mole-suave)}
+.chip{font-size:14px;padding:4px 10px;border-radius:99px;background:var(--papel-2);color:var(--mole-suave);border:0;cursor:pointer}
+.chip.on{background:var(--nopal);color:#fff}
+h1,h2{font-family:"Alegreya",serif;font-weight:800;line-height:1.15;margin:0 0 8px}
+h1{font-size:30px} h2{font-size:24px}
+p{margin:0 0 12px}
+.card{background:var(--blanco);border:1px solid var(--linea);border-radius:18px;padding:20px;box-shadow:0 2px 0 var(--linea)}
+.card + .card{margin-top:16px}
+.muted{color:var(--mole-suave);font-size:16px}
+label{display:block;font-weight:700;margin:12px 0 4px}
+input[type=text],input[type=tel],input[type=password]{width:100%;padding:14px;border:2px solid var(--linea);border-radius:12px;background:#fff;color:#2b1a12;font-size:20px}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:16px;margin-top:14px}
+.check input{width:24px;height:24px;margin-top:2px;flex:none}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px;border:0;border-radius:14px;background:var(--chile);color:#fff;font-weight:700;font-size:20px;text-decoration:none;cursor:pointer;margin-top:16px}
+.btn.sec{background:var(--papel-2);color:var(--mole)}
+.btn.wa{background:#1f7a46}
+.btn[disabled]{opacity:.6}
+.error{color:var(--chile);font-weight:700;min-height:1.5em;margin-top:10px}
+/* Tarjeta del cliente */
+.saludo{font:800 28px/1.1 "Alegreya",serif}
+.sellos{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0 10px}
+.sello{aspect-ratio:1;border-radius:50%;border:2px dashed var(--linea);display:grid;place-items:center;font-weight:700;font-size:16px;color:var(--mole-suave);background:var(--papel)}
+.sello.premio{border-color:var(--maiz);color:#8a5d0a}
+.sello.lleno{border:0;background:var(--nopal);color:#fff;font-size:22px}
+.sello.lleno.premio{background:var(--maiz);color:#3A2318}
+.sello.nuevo{animation:pop .6s ease}
+@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.qr{display:grid;place-items:center;margin:14px 0 6px}
+.qr svg{width:200px;height:200px;background:#fff;border-radius:12px;padding:6px}
+.codigo{text-align:center;font:700 20px/1 ui-monospace,monospace;letter-spacing:3px}
+.reglas{font-size:15px;color:var(--mole-suave);margin:12px 0 0;padding-left:18px}
+/* Avisos grandes */
+.aviso{border-radius:16px;padding:18px;margin-bottom:16px;color:#fff;font-weight:700}
+.aviso big{display:block;font:800 30px/1.1 "Alegreya",serif;margin-bottom:4px}
+.aviso.verde{background:var(--nopal)}
+.aviso.naranja{background:#C2571A}
+.aviso.amarillo{background:var(--maiz);color:#3A2318}
+.aviso.azul{background:var(--azul)}
+.aviso.rojo{background:var(--chile)}
+/* Caja */
+.video{position:relative;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:4/3}
+.video video{width:100%;height:100%;object-fit:cover;display:block}
+.video .mira{position:absolute;inset:18%;border:3px solid rgba(255,255,255,.8);border-radius:14px}
+.recientes{list-style:none;margin:0;padding:0}
+.recientes li{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--linea);font-size:16px}
+.punto{display:inline-block;width:10px;height:10px;border-radius:50%;background:#2e9d57;margin-right:6px}
+.punto.off{background:var(--chile)}
+.fila{display:flex;gap:10px}
+.fila input{flex:1}
+.fila .btn{width:auto;margin-top:0;padding:14px 18px}
+.cargando{opacity:.55;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="marca">Kutzi<small>Mercado regional</small></div>
+    <button class="chip" id="chip-staff" type="button" hidden>Soy de Kutzi</button>
+  </header>
+  <main id="app" aria-live="polite"><p class="muted">Cargando…</p></main>
+</div>
+
+<script>
+/* ===== Configuración ===== */
+const API = "https://script.google.com/macros/s/AKfycbxL1zDR5dp-FfeqYc8F-LGluRS3tTsA3Ezr5nTx7m3oPQCGrHtklBDKpqhCcbupQ4gz/exec";
+const BASE = location.origin + location.pathname.replace(/index\.html$/,"");
+
+/* ===== Utilidades ===== */
+const $ = s => document.querySelector(s);
+const app = $("#app");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const params = new URLSearchParams(location.search);
+const store = {
+  get(k){ try{ return localStorage.getItem(k) }catch(e){ return null } },
+  set(k,v){ try{ localStorage.setItem(k,v) }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k) }catch(e){} }
+};
+const getPin = () => store.get("kutzi_pin");
+const limpiaId = t => String(t||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+
+async function api(accion, datos={}){
+  const r = await fetch(API, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify({accion, ...datos})});
+  if(!r.ok) throw new Error("Sin conexión con el sistema. Intenta de nuevo.");
+  const j = await r.json();
+  if(!j.ok) throw new Error(j.error || "Ocurrió un error.");
+  return j.data;
+}
+
+/* Saca el código de cualquier QR: enlace de Apps Script, de GitHub o código suelto */
+function idDeTexto(t){
+  t = String(t||"").trim();
+  const m = t.match(/[?&#]id=([A-Za-z0-9]+)/);
+  if(m) return limpiaId(m[1]);
+  if(/^[A-Za-z0-9]{4,10}$/.test(t)) return limpiaId(t);
+  return "";
+}
+const urlTarjeta = id => `${BASE}?id=${id}`;
+
+function qrSvg(texto){
+  const qr = qrcode(0,"M"); qr.addData(texto); qr.make();
+  return qr.createSvgTag({cellSize:6, margin:2, scalable:true});
+}
+
+let audioCtx;
+function bip(premio){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const notas = premio ? [660,880,1100] : [880];
+    notas.forEach((f,i)=>{
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.frequency.value = f; o.connect(g); g.connect(audioCtx.destination);
+      const t = audioCtx.currentTime + i*0.16;
+      g.gain.setValueAtTime(0.25,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
+      o.start(t); o.stop(t+0.16);
+    });
+  }catch(e){}
+}
+
+/* ===== Piezas de interfaz ===== */
+function sellosHtml(c, nuevo){
+  let h = "";
+  for(let i=1;i<=c.porTarjeta;i++){
+    const lleno = i <= c.enTarjeta, premio = c.premiosVisitas.includes(i);
+    h += `<div class="sello ${lleno?"lleno":""} ${premio?"premio":""} ${nuevo && i===c.enTarjeta?"nuevo":""}" aria-label="Visita ${i}${lleno?" registrada":""}">${lleno?"✓":(premio?"10%":i)}</div>`;
+  }
+  return `<div class="sellos">${h}</div>`;
+}
+
+function avisoRegistro(r){
+  if(r.premio) return `<div class="aviso naranja"><big>APLICA 10% EN ESTA COMPRA</big>${esc(r.nombre)} · visita ${r.n} de ${r.porTarjeta}${r.tope?` · tope $${r.tope}`:""}</div>`;
+  const falta = r.proximo ? ` · faltan ${r.proximo - r.n} para el 10%` : "";
+  return `<div class="aviso verde"><big>¡Gracias, ${esc(String(r.nombre).split(" ")[0])}!</big>Visita ${r.n} de ${r.porTarjeta}${falta}</div>`;
+}
+
+function avisoError(msg){
+  if(/ya registr/i.test(msg)) return `<div class="aviso amarillo"><big>Ya vino hoy</big>Esta tarjeta ya sumó su visita de hoy. No se registró nada.</div>`;
+  if(/PIN/i.test(msg)) return `<div class="aviso rojo"><big>PIN incorrecto</big>Vuelve a escribir el PIN de empleado.</div>`;
+  return `<div class="aviso rojo"><big>No se pudo registrar</big>${esc(msg)}</div>`;
+}
+
+/* ===== Vista: tarjeta del cliente (?id=) ===== */
+async function vistaTarjeta(id, opciones={}){
+  app.innerHTML = `<p class="muted">Cargando tarjeta…</p>`;
+  let c;
+  try{ c = await api("cliente",{id}) }
+  catch(e){ app.innerHTML = `<div class="aviso rojo"><big>Sin conexión</big>${esc(e.message)}</div><button class="btn sec" onclick="location.reload()">Reintentar</button>`; return }
+  if(!c.existe){ app.innerHTML = `<div class="card"><h1>Tarjeta no encontrada</h1><p>El código <b>${esc(id)}</b> no existe. Revisa el QR o regístrate de nuevo.</p><a class="btn" href="${BASE}?alta=1">Registrarme</a></div>`; return }
+  if(!c.registrado){ vistaAlta(id, c); return }
+
+  let aviso = "", nuevo = false, wa = "";
+  if(getPin() && !opciones.sinRegistro){
+    if(c.yaVinoHoy){ aviso = avisoError("ya registró") }
+    else{
+      try{
+        const r = await api("registrar",{id, pin:getPin()});
+        r.proximo = c.premiosVisitas.filter(p=>p>r.n)[0];
+        aviso = avisoRegistro(r); bip(r.premio); nuevo = true; wa = r.wa;
+        c.enTarjeta = r.n; c.total = r.total;
+      }catch(e){ aviso = avisoError(e.message); if(/PIN/i.test(e.message)) store.del("kutzi_pin") }
+    }
+  }
+  const sig = c.enTarjeta >= c.porTarjeta ? 1 : c.enTarjeta + 1;
+  const prox = c.premiosVisitas.filter(p=>p>=sig)[0];
+  const textoProx = !getPin() ? (c.premiosVisitas.includes(sig) ? `<p><b>¡En tu próxima visita tienes 10% de descuento en toda tu compra!</b></p>` : prox ? `<p class="muted">Te faltan ${prox - c.enTarjeta} visitas para tu 10% de descuento.</p>` : "") : "";
+  app.innerHTML = `${aviso}
+    <div class="card">
+      <div class="saludo">Hola, ${esc(String(c.nombre).split(" ")[0])}</div>
+      <p class="muted">Tarjeta ${esc(c.negocio)} · visita ${c.enTarjeta} de ${c.porTarjeta}${c.ultima?` · última: ${esc(c.ultima)}`:""}</p>
+      ${sellosHtml(c, nuevo)}
+      ${textoProx}
+      ${wa?`<a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">Enviar avance por WhatsApp</a>`:""}
+    </div>
+    <div class="card">
+      <h2>Tu código</h2>
+      <p class="muted">Muéstralo en caja en cada compra. Guárdalo con una captura de pantalla.</p>
+      <div class="qr">${qrSvg(urlTarjeta(c.id))}</div>
+      <div class="codigo">${esc(c.id)}</div>
+      ${c.telNegocio?`<a class="btn sec" href="https://wa.me/${esc(c.telNegocio)}?text=${encodeURIComponent("Mi tarjeta de lealtad Kutzi: "+urlTarjeta(c.id))}" target="_blank" rel="noopener">Guardar en el chat de Kutzi</a>`:""}
+      <ul class="reglas"><li>Cualquier compra suma una visita (una por día).</li><li>10% de descuento en las visitas ${c.premiosVisitas.join(" y ")} en toda tu compra.</li></ul>
+    </div>
+    ${getPin()?`<a class="btn sec" href="${BASE}?caja=1">Ir a la caja (escáner)</a>`:""}`;
+}
+
+/* ===== Vista: registro (?alta=1 o tarjeta impresa sin activar) ===== */
+function vistaAlta(id, c){
+  const impresa = !!id;
+  app.innerHTML = `<div class="card">
+    <h1>${impresa?"Activa tu tarjeta":"Tu tarjeta de lealtad"}</h1>
+    <p>Cada compra suma una visita. En las visitas ${c?c.premiosVisitas.join(" y "):"5 y 10"} tienes <b>10% de descuento en toda tu compra</b>.</p>
+    <form id="f-alta" novalidate>
+      <label for="nombre">Nombre</label>
+      <input type="text" id="nombre" autocomplete="name" required>
+      <label for="tel">WhatsApp (10 dígitos)</label>
+      <input type="tel" id="tel" inputmode="numeric" autocomplete="tel" placeholder="443 123 4567" required>
+      <label class="check"><input type="checkbox" id="acepta"> Acepto recibir mensajes de Kutzi por WhatsApp sobre mi tarjeta y promociones.</label>
+      <button class="btn" type="submit">${impresa?"Activar tarjeta":"Registrarme"}</button>
+      <div class="error" id="err"></div>
+    </form></div>`;
+  $("#f-alta").onsubmit = async ev => {
+    ev.preventDefault();
+    const f = ev.currentTarget; f.classList.add("cargando"); $("#err").textContent = "";
+    try{
+      const r = await api("alta",{id, nombre:$("#nombre").value, tel:$("#tel").value, acepta:$("#acepta").checked});
+      history.replaceState(null,"",`${BASE}?id=${r.id}`);
+      if(r.existente) alert("Ese WhatsApp ya tenía tarjeta. Te mostramos la tuya.");
+      vistaTarjeta(r.id, {sinRegistro:true});
+    }catch(e){ $("#err").textContent = e.message; f.classList.remove("cargando") }
+  };
+}
+
+/* ===== PIN de empleado ===== */
+function vistaPin(despues){
+  app.innerHTML = `<div class="card">
+    <h1>Soy de Kutzi</h1>
+    <p class="muted">Escribe el PIN de empleado. Se guarda en este celular; solo hace falta una vez.</p>
+    <form id="f-pin"><label for="pin">PIN</label>
+      <input type="password" id="pin" inputmode="numeric" autocomplete="off">
+      <button class="btn" type="submit">Entrar</button><div class="error" id="err"></div></form>
+    ${getPin()?`<button class="btn sec" id="salir" type="button">Quitar PIN de este celular</button>`:""}
+  </div>`;
+  $("#pin").focus();
+  const s = $("#salir"); if(s) s.onclick = ()=>{ store.del("kutzi_pin"); location.href = BASE + "?alta=1" };
+  $("#f-pin").onsubmit = async ev => {
+    ev.preventDefault(); $("#err").textContent = "";
+    try{
+      const r = await api("pin",{pin:$("#pin").value});
+      if(!r.valido) throw new Error("PIN incorrecto.");
+      store.set("kutzi_pin", $("#pin").value.trim()); actualizaChip(); despues();
+    }catch(e){ $("#err").textContent = e.message }
+  };
+}
+
+/* ===== Vista: caja con escáner (?caja=1) ===== */
+const recientes = [];
+let stream, ultimo = {id:"", t:0}, ocupado = false;
+
+function vistaCaja(){
+  if(!getPin()){ vistaPin(vistaCaja); return }
+  app.innerHTML = `
+    <div id="aviso-caja"><div class="aviso azul"><big>Listo para escanear</big>Acerca la tarjeta del cliente a la cámara.</div></div>
+    <div class="video" id="caja-video"><video id="vid" playsinline muted></video><div class="mira"></div></div>
+    <button class="btn" id="btn-cam" type="button">Encender cámara</button>
+    <div class="card" style="margin-top:16px">
+      <h2>¿No trae su tarjeta?</h2>
+      <form class="fila" id="f-buscar"><input type="tel" id="b-tel" inputmode="numeric" placeholder="WhatsApp a 10 dígitos" aria-label="WhatsApp del cliente"><button class="btn" type="submit">Buscar</button></form>
+      <div class="error" id="err-b"></div>
+    </div>
+    <div class="card"><h2>Últimas visitas</h2><ul class="recientes" id="lista-rec"><li class="muted">Todavía no hay visitas en este turno.</li></ul></div>
+    <p class="muted" style="margin-top:14px"><span class="punto" id="punto"></span><span id="estado-red">En línea</span> · <a href="${BASE}?alta=1">Registrar cliente nuevo</a></p>`;
+  $("#btn-cam").onclick = encenderCamara;
+  $("#f-buscar").onsubmit = async ev => {
+    ev.preventDefault(); $("#err-b").textContent = "";
+    try{ const r = await api("buscar",{tel:$("#b-tel").value, pin:getPin()}); $("#b-tel").value=""; procesarId(r.id) }
+    catch(e){ $("#err-b").textContent = e.message }
+  };
+  red(); encenderCamara();
+}
+
+async function encenderCamara(){
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}, audio:false});
+    const v = $("#vid"); v.srcObject = stream; await v.play();
+    $("#btn-cam").hidden = true; leerCuadro();
+  }catch(e){
+    $("#btn-cam").hidden = false;
+    $("#aviso-caja").innerHTML = `<div class="aviso rojo"><big>Sin cámara</big>Toca "Encender cámara" y permite el acceso. Si no aparece, abre esta página en Chrome.</div>`;
+  }
+}
+
+const detector = ("BarcodeDetector" in window) ? new BarcodeDetector({formats:["qr_code"]}) : null;
+const lienzo = document.createElement("canvas"), ctx = lienzo.getContext("2d",{willReadFrequently:true});
+
+async function leerCuadro(){
+  const v = $("#vid");
+  if(!v || !stream) return;
+  if(v.readyState >= 2 && !ocupado){
+    let texto = "";
+    try{
+      if(detector){ const r = await detector.detect(v); if(r[0]) texto = r[0].rawValue }
+      else{
+        const w = 480, h = Math.round(w * v.videoHeight / v.videoWidth);
+        lienzo.width = w; lienzo.height = h; ctx.drawImage(v,0,0,w,h);
+        const r = jsQR(ctx.getImageData(0,0,w,h).data, w, h, {inversionAttempts:"dontInvert"});
+        if(r) texto = r.data;
+      }
+    }catch(e){}
+    const id = idDeTexto(texto);
+    if(id && !(id === ultimo.id && Date.now() - ultimo.t < 8000)){ ultimo = {id, t:Date.now()}; procesarId(id) }
+  }
+  requestAnimationFrame(()=>setTimeout(leerCuadro, 120));
+}
+
+async function procesarId(id){
+  ocupado = true;
+  const caja = $("#aviso-caja");
+  caja.innerHTML = `<div class="aviso azul"><big>Registrando…</big>Tarjeta ${esc(id)}</div>`;
+  try{
+    const r = await api("registrar",{id, pin:getPin()});
+    const c = await api("cliente",{id}).catch(()=>null);
+    r.proximo = c ? c.premiosVisitas.filter(p=>p>r.n)[0] : null;
+    caja.innerHTML = avisoRegistro(r) + `<a class="btn wa" style="margin-top:-6px;margin-bottom:16px" href="${esc(r.wa)}" target="_blank" rel="noopener">Enviar avance por WhatsApp</a>`;
+    bip(r.premio);
+    recientes.unshift({hora:new Date().toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"}), nombre:r.nombre, txt: r.premio ? "10% aplicado" : `visita ${r.n}`});
+    pintaRecientes();
+  }catch(e){
+    if(/aún no tiene cliente/i.test(e.message)){
+      caja.innerHTML = `<div class="aviso azul"><big>Tarjeta nueva</big>Esta tarjeta todavía no está activada.</div><a class="btn" style="margin-top:-6px;margin-bottom:16px" href="${BASE}?id=${id}">Activar con nombre y WhatsApp</a>`;
+    }else{
+      caja.innerHTML = avisoError(e.message);
+      if(/PIN/i.test(e.message)){ store.del("kutzi_pin"); setTimeout(vistaCaja,1500) }
+    }
+  }
+  setTimeout(()=>{ ocupado = false }, 1500);
+}
+
+function pintaRecientes(){
+  $("#lista-rec").innerHTML = recientes.slice(0,5).map(x=>`<li><span>${esc(x.hora)} · ${esc(x.nombre)}</span><b>${esc(x.txt)}</b></li>`).join("");
+}
+function red(){
+  const pinta = ()=>{ const on = navigator.onLine; const p=$("#punto"), t=$("#estado-red"); if(p){ p.classList.toggle("off",!on); t.textContent = on?"En línea":"Sin internet: no se registran visitas" } };
+  addEventListener("online",pinta); addEventListener("offline",pinta); pinta();
+}
+
+/* ===== Arranque ===== */
+function actualizaChip(){
+  const ch = $("#chip-staff"); ch.hidden = false;
+  ch.classList.toggle("on", !!getPin());
+  ch.textContent = getPin() ? "Caja Kutzi ✓" : "Soy de Kutzi";
+  ch.onclick = () => getPin() ? (location.href = BASE + "?caja=1") : vistaPin(()=>location.reload());
+}
+actualizaChip();
+const idUrl = limpiaId(params.get("id"));
+if(params.get("caja")) vistaCaja();
+else if(idUrl) vistaTarjeta(idUrl);
+else vistaAlta("", null);
+</script>
+</body>
+</html>
